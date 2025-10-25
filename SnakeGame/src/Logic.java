@@ -1,19 +1,36 @@
 package src;
+import javafx.geometry.Point2D;
+
 /**
- * A class to handle the game logic for snake. As of now
- * mainly stores a constant grid to be used.
+ * A class to handle the game logic for snake.
+ * Stores the grid, snake, and food for use in
+ * the SnakePlayer class
  *
- * @version 0.1.0
+ * @version 0.2.0
  * @author BMO
  */
 public class Logic {
     private Point2D[][] grid;
+    private Snake snake;
+    private Food food;
 
     /**
      * Default constructor for Logic
      */
-    public Logic() {
+    public Logic(Snake snake, Food food) {
+        this.snake = snake;
+        this.food = food;
+    }
 
+    public boolean gameOver() {
+        if (snakeCollision()) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean snakeCollision() {
+        return false;
     }
 
     /**
@@ -42,7 +59,10 @@ public class Logic {
      * @return the coordinates to place the initial fruit
      */
     public Point2D spawnFruit() {
-        Food food = new Food(this.grid);
-        return food.initialSpawn();
+        return food.initialSpawn(grid);
+    }
+
+    public void setDirection(Direction direction) {
+        snake.movement(direction);
     }
 }

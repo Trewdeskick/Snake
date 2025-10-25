@@ -1,6 +1,5 @@
 package src;
 import javafx.geometry.Point2D;
-import javafx.scene.input.KeyCode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +10,7 @@ import java.util.List;
  * If the player collides the 'head' of the snake into the walls or
  * the body of the Snake itself, they have lost.
  *
- * @version 0.2.0
+ * @version 0.3.0
  * @author BMO
  */
 public class Snake {
@@ -19,9 +18,15 @@ public class Snake {
 When Player calls this it's only for the logic, not the constructor
 It needs to access the (x,y) of the head and body.
  */
+    private final int direction = 40;
     private final double headX;
     private final double headY;
     private List<Point2D> body = new ArrayList<>();
+
+    private boolean canUp = true;
+    private boolean canDown = true;
+    private boolean canLeft = true;
+    private boolean canRight = true;
 
     /**
      * Constructor for the logic class to be used in rendering
@@ -44,31 +49,43 @@ It needs to access the (x,y) of the head and body.
      * STILL NEEDS: LOGIC CHECKS AND LOOP FOR CONTINUOUS MOVEMENT
      *
      * @param pressed the key that is pressed
-     * @return a new list of points for the body
      */
-    public List<Point2D> movement(KeyCode pressed) {
+    public void movement(Direction pressed) {
         double x = body.getFirst().getX();
         double y = body.getFirst().getY();
-        int direction = 40;
-            if (pressed == KeyCode.UP) {
+
+            if (pressed == Direction.UP && canUp) {
                 body.addFirst(new Point2D(x, y - direction));
                 body.removeLast();
-            } else if (pressed == KeyCode.DOWN) {
+                canDown = false;
+                canLeft = true;
+                canRight = true;
+            } else if (pressed == Direction.DOWN && canDown) {
                 body.addFirst(new Point2D(x, y + direction));
                 body.removeLast();
-            } else if (pressed == KeyCode.LEFT) {
+                canUp = false;
+                canLeft = true;
+                canRight = true;
+            } else if (pressed == Direction.LEFT && canLeft) {
                 body.addFirst(new Point2D(x - direction, y));
                 body.removeLast();
-            } else if (pressed == KeyCode.RIGHT) {
+                canRight = false;
+                canUp = true;
+                canDown = true;
+            } else if (pressed == Direction.RIGHT && canRight) {
                 body.addFirst(new Point2D(x + direction, y));
                 body.removeLast();
+                canLeft = false;
+                canUp = true;
+                canDown = true;
             }
-        return body;
-        }
+    }
+
 
     /**
      * Uses headX and headY to create the points for the Snake
-     * for the initial positioning of the snake
+     * for the initial positioning of the snake, and updating  of
+     * the body as it moves
      *
      * @return the list of coordinates for body positions
      */

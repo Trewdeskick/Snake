@@ -13,7 +13,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,10 +20,9 @@ import java.util.List;
  * SnakePlayer renders the game logic handled via the Snake class.
  * Currently, turns grid points into: a grid, the Snake itself, and
  * a piece of food.
- *
  * NEEDS: to remove food on collection, and handle snake growth.
  *
- * @version 0.2.0
+ * @version 0.3.0
  * @author BMO
  */
 public class SnakePlayer extends Application {
@@ -32,15 +30,21 @@ public class SnakePlayer extends Application {
     final private Pane gridLayer = new Pane();
     final private Pane fruitLayer = new Pane();
     final private Pane snakeLayer = new Pane();
+
     final double size = 800.0;
     final int cols = 20;
     final int rows = 20;
+
     private final int headX = (int) size /2;
     private final int headY = (int) size /2;
+
     private final List<Point2D> body = new ArrayList<>();
     private final Snake snake = new Snake(headX, headY, body);
-    private final Logic game = new Logic();
     private final List<Node> snakeBody = new ArrayList<>();
+    private final Food fruit = new Food();
+    private final Logic game = new Logic(snake, fruit);
+
+    private Direction current = null;
     
     @Override
     public void start(Stage primaryStage) {
@@ -52,8 +56,15 @@ public class SnakePlayer extends Application {
 
         gridLayout();
         renderSnake();
-
         renderMoves();
+
+        KeyFrame kf = new KeyFrame(Duration.millis(50), _ -> {
+            game.setDirection(current);
+            renderSnake();
+        });
+        Timeline timeline = new Timeline(kf);
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
 
 
         root.getChildren().addAll(gridLayer, fruitLayer, snakeLayer);
@@ -70,22 +81,24 @@ public class SnakePlayer extends Application {
      * Handler to call movement logic from the Snake class
      */
     private void renderMoves() {
-        KeyFrame kf = new KeyFrame(Duration.millis(1.0));
-
         root.setOnKeyPressed(event -> {
             KeyCode press = event.getCode();
             switch (press) {
-                case UP, RIGHT, LEFT, DOWN:
-                    snake.movement(press);
-                    renderSnake();
+                case UP:
+                    current = Direction.UP;
                     break;
-                default:
+                case DOWN:
+                    current = Direction.DOWN;
+                    break;
+                case LEFT:
+                    current = Direction.LEFT;
+                    break;
+                case RIGHT:
+                    current = Direction.RIGHT;
+                    break;
             }
         });
 
-        Timeline timeline = new Timeline(kf);
-        timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.play();
     }
 
     /**
@@ -96,23 +109,18 @@ public class SnakePlayer extends Application {
         // could this be handled better?
         snakeLayer.getChildren().clear();
 
-        int i = -1;
         List<Point2D> snakePoints = snake.createSnake();
         snakeBody.clear();
 
         // this should scale with added body Nodes
         for (Point2D p : snakePoints) {
             Rectangle segment = new Rectangle(size / cols, size / rows);
-            i++;
             segment.setX(p.getX());
             segment.setY(p.getY());
-            if (i % 2 == 0) {
-                segment.setFill(Color.BLACK);
-                snakeBody.add(segment);
-            } else {
-                segment.setFill(Color.BLACK.brighter());
-                snakeBody.add(segment);
-            }
+
+            segment.setFill(Color.BLACK);
+            snakeBody.add(segment);
+
         }
         snakeLayer.getChildren().addAll(snakeBody);
     }
@@ -124,6 +132,7 @@ public class SnakePlayer extends Application {
         Rectangle render;
 
         Point2D[][] grid = game.createGrid(rows, cols, size);
+
 
         // creates grid. uses (i+j) % 2 to create the checkerboard pattern
         for (int i = 0; i < rows; i++) {
@@ -138,7 +147,6 @@ public class SnakePlayer extends Application {
                 gridLayer.getChildren().addAll(render);
             }
         }
-        // is this the correct place for this call?
         fruitLayer.getChildren().add(renderInitialFruit());
     }
 
