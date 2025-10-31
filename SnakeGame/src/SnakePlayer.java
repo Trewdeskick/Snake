@@ -57,14 +57,16 @@ public class SnakePlayer extends Application {
         gridLayout();
         renderSnake();
         renderMoves();
+        renderInitialFruit();
 
-        KeyFrame kf = new KeyFrame(Duration.millis(50), _ -> {
-            game.setDirection(current);
-            renderSnake();
-        });
-        Timeline timeline = new Timeline(kf);
-        timeline.setCycleCount(Animation.INDEFINITE);
+        Timeline timeline = getTimeline();
         timeline.play();
+
+        // TO BE IMPLEMENTED LATER FOR GAME LOSS
+//        if (game.gameOver()) {
+//            Alert lost = new Alert(Alert.AlertType.ERROR, "You have lost :(");
+//            lost.showAndWait();
+//        }
 
 
         root.getChildren().addAll(gridLayer, fruitLayer, snakeLayer);
@@ -75,6 +77,40 @@ public class SnakePlayer extends Application {
         root.setFocusTraversable(true);
         root.requestFocus();
 
+    }
+
+    /**
+     * Sets up timeline and tick-speed for the game to run
+     * @return a timeline that handles running the game
+     */
+    private Timeline getTimeline() {
+        KeyFrame kf = new KeyFrame(Duration.millis(175), _ -> {
+                if (game.gameOver()){
+                    return;
+                }
+            game.setDirection(current);
+                renderSnake();
+                if (game.fruitCheck()) {
+                    game.fruitCollision();
+                }
+                renderFruit();
+
+        });
+        Timeline timeline = new Timeline(kf);
+        timeline.setCycleCount(Animation.INDEFINITE);
+        return timeline;
+    }
+
+    /**
+     * Clears the fruit from the grid and adds a fruit in a random location
+     */
+    private void renderFruit() {
+            fruitLayer.getChildren().clear();
+            Rectangle fruit = new Rectangle(size / cols - 10, size / rows - 10, Color.RED);
+            fruit.setX(game.fruitCollision().getX() + 5);
+            fruit.setY(game.fruitCollision().getY() + 5);
+
+            fruitLayer.getChildren().add(fruit);
     }
 
     /**
@@ -108,6 +144,7 @@ public class SnakePlayer extends Application {
     private void renderSnake() {
         // could this be handled better?
         snakeLayer.getChildren().clear();
+        int i = 0;
 
         List<Point2D> snakePoints = snake.createSnake();
         snakeBody.clear();
@@ -118,8 +155,15 @@ public class SnakePlayer extends Application {
             segment.setX(p.getX());
             segment.setY(p.getY());
 
-            segment.setFill(Color.BLACK);
-            snakeBody.add(segment);
+            if (i % 2 == 0) {
+                segment.setFill(Color.BLACK);
+                snakeBody.add(segment);
+                i++;
+            } else {
+                segment.setFill(Color.GRAY.darker());
+                snakeBody.add(segment);
+                i++;
+            }
 
         }
         snakeLayer.getChildren().addAll(snakeBody);
@@ -153,6 +197,8 @@ public class SnakePlayer extends Application {
     /**
      * Sets initial fruit spawn, could modularize via setting a first spawn
      * in the logic for the Food itself
+     *
+     * @return fruit a Rectangle that represents the food
       */
     private Rectangle renderInitialFruit() {
         Rectangle fruit = new Rectangle(size / cols - 10, size / rows - 10);

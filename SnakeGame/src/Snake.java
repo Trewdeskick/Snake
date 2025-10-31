@@ -23,10 +23,8 @@ It needs to access the (x,y) of the head and body.
     private final double headY;
     private List<Point2D> body = new ArrayList<>();
 
-    private boolean canUp = true;
-    private boolean canDown = true;
-    private boolean canLeft = true;
-    private boolean canRight = true;
+
+
 
     /**
      * Constructor for the logic class to be used in rendering
@@ -50,35 +48,28 @@ It needs to access the (x,y) of the head and body.
      *
      * @param pressed the key that is pressed
      */
-    public void movement(Direction pressed) {
+    public Direction movement(Direction pressed) {
         double x = body.getFirst().getX();
         double y = body.getFirst().getY();
 
-            if (pressed == Direction.UP && canUp) {
+            if (pressed == Direction.UP) {
                 body.addFirst(new Point2D(x, y - direction));
                 body.removeLast();
-                canDown = false;
-                canLeft = true;
-                canRight = true;
-            } else if (pressed == Direction.DOWN && canDown) {
+                return Direction.UP;
+            } else if (pressed == Direction.DOWN) {
                 body.addFirst(new Point2D(x, y + direction));
                 body.removeLast();
-                canUp = false;
-                canLeft = true;
-                canRight = true;
-            } else if (pressed == Direction.LEFT && canLeft) {
+                return Direction.DOWN;
+            } else if (pressed == Direction.LEFT) {
                 body.addFirst(new Point2D(x - direction, y));
                 body.removeLast();
-                canRight = false;
-                canUp = true;
-                canDown = true;
-            } else if (pressed == Direction.RIGHT && canRight) {
+                return Direction.LEFT;
+            } else if (pressed == Direction.RIGHT) {
                 body.addFirst(new Point2D(x + direction, y));
                 body.removeLast();
-                canLeft = false;
-                canUp = true;
-                canDown = true;
+                return Direction.RIGHT;
             }
+            return null;
     }
 
 
@@ -90,9 +81,6 @@ It needs to access the (x,y) of the head and body.
      * @return the list of coordinates for body positions
      */
     public List<Point2D> createSnake() {
-        /*
-        Requires further work for when body points are added
-         */
         return body;
     }
 
@@ -100,8 +88,9 @@ It needs to access the (x,y) of the head and body.
     /**
      * coming in a future version
      */
-    private void grow() {
-
+    public void grow() {
+        Point2D tail = new Point2D(body.getLast().getX(), body.getLast().getY());
+        body.add(tail);
     }
 
 }
