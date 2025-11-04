@@ -134,7 +134,9 @@ public class Logic {
      * @return true if the move is valid, false if not
      */
     private boolean isValidMove(Direction direction, Direction prev) {
-        if (prev == Direction.UP && direction == Direction.DOWN) {
+        if (prev == null && direction == Direction.LEFT) {
+            return false;
+        } else if (prev == Direction.UP && direction == Direction.DOWN) {
             return false;
         } else if (prev == Direction.DOWN && direction == Direction.UP) {
             return false;
