@@ -12,6 +12,7 @@ import java.util.List;
  */
 public class Logic {
     private Point2D[][] grid;
+    private List<Point2D> currentBody;
     private final Snake snake;
     private final Food food;
     private Direction previous;
@@ -28,11 +29,29 @@ public class Logic {
         this.food = food;
     }
 
-    public boolean gameOver() {
-        if (snakeCollision()) {
+    /**
+     * Checks for game over cases and returns true if they
+     * have been met
+     * @param size the size of the pane the snake is contained in
+     * @return true if a game over condition has been met
+     */
+    public boolean gameOver(double size) {
+        if (snakeCollision() || wallCollision(size)) {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Checks for collisions with the walls
+     * @param size the size of the pane the snake is contained in
+     * @return true if a collision has happened
+     */
+    private boolean wallCollision(double size) {
+        return currentBody.getFirst().getX() == size ||
+                currentBody.getFirst().getY() == size ||
+                currentBody.getFirst().getX() < 0 ||
+                currentBody.getFirst().getY() < 0;
     }
 
     /**
@@ -42,7 +61,6 @@ public class Logic {
      * @return true if snake collides with itself
      */
     private boolean snakeCollision() {
-        List<Point2D> currentBody = snake.createSnake();
         for (int i = 2; i < currentBody.size(); i++) {
             if (currentBody.getFirst().getX() == currentBody.get(i).getX() &&
                     currentBody.getFirst().getY() == currentBody.get(i).getY()) {
